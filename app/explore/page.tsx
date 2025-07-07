@@ -34,6 +34,7 @@ export default function ExplorePage() {
         <TabsContent value="trending">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             <MediaCard
+              id="trending-1"
               title="Lessons in Chemistry"
               type="Book"
               coverImage="/placeholder.svg?height=200&width=150"
@@ -43,6 +44,7 @@ export default function ExplorePage() {
               isSaved={false}
             />
             <MediaCard
+              id="trending-2"
               title="Oppenheimer"
               type="Movie"
               coverImage="/placeholder.svg?height=200&width=150"
@@ -52,6 +54,7 @@ export default function ExplorePage() {
               isSaved={false}
             />
             <MediaCard
+              id="trending-3"
               title="The Rest Is History"
               type="Podcast"
               coverImage="/placeholder.svg?height=200&width=150"
@@ -61,6 +64,7 @@ export default function ExplorePage() {
               isSaved={false}
             />
             <MediaCard
+              id="trending-4"
               title="The Anthropocene Reviewed"
               type="Book"
               coverImage="/placeholder.svg?height=200&width=150"
@@ -75,6 +79,7 @@ export default function ExplorePage() {
         <TabsContent value="new">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             <MediaCard
+              id="new-1"
               title="Fourth Wing"
               type="Book"
               coverImage="/placeholder.svg?height=200&width=150"
@@ -84,6 +89,7 @@ export default function ExplorePage() {
               isSaved={false}
             />
             <MediaCard
+              id="new-2"
               title="Barbie"
               type="Movie"
               coverImage="/placeholder.svg?height=200&width=150"
@@ -98,6 +104,7 @@ export default function ExplorePage() {
         <TabsContent value="popular">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             <MediaCard
+              id="popular-1"
               title="Atomic Habits"
               type="Book"
               coverImage="/placeholder.svg?height=200&width=150"
@@ -107,6 +114,7 @@ export default function ExplorePage() {
               isSaved={false}
             />
             <MediaCard
+              id="popular-2"
               title="Everything Everywhere All at Once"
               type="Movie"
               coverImage="/placeholder.svg?height=200&width=150"
