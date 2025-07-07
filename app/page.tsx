@@ -1,103 +1,282 @@
-import Image from "next/image";
+"use client"
+
+import { useState, useEffect } from "react"
+import Link from "next/link"
+import { PlusCircle, Loader2, BookOpen, Film, Headphones, FileText } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { MediaCard } from "@/components/media-card"
+import { FriendFeed } from "@/components/friend-feed"
+import { MediaService } from "@/lib/media-service"
+import { MediaEntry } from "@/lib/supabase"
+import { useUser } from "@/lib/user-context"
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const { user, loading: authLoading } = useUser()
+  const [entries, setEntries] = useState<MediaEntry[]>([])
+  const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState("all")
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    if (user) {
+      loadEntries()
+    } else if (!authLoading) {
+      setLoading(false)
+    }
+  }, [user, authLoading])
+
+  const loadEntries = async () => {
+    if (!user) return
+    
+    try {
+      setLoading(true)
+      const userEntries = await MediaService.getUserEntries(user.id)
+      setEntries(userEntries)
+    } catch (error) {
+      console.error("Error loading entries:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getFilteredEntries = (type: string) => {
+    if (type === "all") return entries
+    return entries.filter(entry => entry.media_type === type)
+  }
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return ""
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+  if (authLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-amber-600" />
+          <span className="ml-2 text-amber-700">Loading...</span>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-amber-800 mb-4">Welcome to Blurbit</h1>
+            <p className="text-xl text-amber-600 mb-8">
+              Track and discover your favorite books, movies, podcasts, and articles
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-amber-200">
+              <BookOpen className="h-12 w-12 text-amber-600 mx-auto mb-4" />
+              <h3 className="font-semibold text-amber-800 mb-2">Books</h3>
+              <p className="text-sm text-amber-600">Track your reading journey</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-amber-200">
+              <Film className="h-12 w-12 text-amber-600 mx-auto mb-4" />
+              <h3 className="font-semibold text-amber-800 mb-2">Movies</h3>
+              <p className="text-sm text-amber-600">Rate and review films</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-amber-200">
+              <Headphones className="h-12 w-12 text-amber-600 mx-auto mb-4" />
+              <h3 className="font-semibold text-amber-800 mb-2">Podcasts</h3>
+              <p className="text-sm text-amber-600">Discover great episodes</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-amber-200">
+              <FileText className="h-12 w-12 text-amber-600 mx-auto mb-4" />
+              <h3 className="font-semibold text-amber-800 mb-2">Articles</h3>
+              <p className="text-sm text-amber-600">Save interesting reads</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <Link href="/auth">
+              <Button className="bg-amber-600 hover:bg-amber-700 text-lg px-8 py-3">
+                Get Started
+              </Button>
+            </Link>
+            <p className="text-amber-600">
+              Sign up to start tracking your media and discover new favorites
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-amber-800">My Media</h1>
+        <Link href="/add">
+          <Button className="bg-amber-600 hover:bg-amber-700">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Entry
+          </Button>
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div className="md:col-span-2">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="w-full bg-amber-50 text-amber-800">
+              <TabsTrigger value="all" className="flex-1">
+                All
+              </TabsTrigger>
+              <TabsTrigger value="book" className="flex-1">
+                Books
+              </TabsTrigger>
+              <TabsTrigger value="movie" className="flex-1">
+                Movies
+              </TabsTrigger>
+              <TabsTrigger value="podcast" className="flex-1">
+                Podcasts
+              </TabsTrigger>
+              <TabsTrigger value="article" className="flex-1">
+                Articles
+              </TabsTrigger>
+            </TabsList>
+            
+            {loading ? (
+              <div className="mt-6 flex justify-center items-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-amber-600" />
+                <span className="ml-2 text-amber-700">Loading your media...</span>
+              </div>
+            ) : (
+              <>
+                <TabsContent value="all" className="mt-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {getFilteredEntries("all").length === 0 ? (
+                      <div className="col-span-2 text-center py-12 text-amber-600">
+                        <p>No media entries yet. Add your first entry!</p>
+                      </div>
+                    ) : (
+                      getFilteredEntries("all").map((entry) => (
+                        <MediaCard
+                          key={entry.id}
+                          id={entry.id || ''}
+                          title={entry.title}
+                          type={entry.media_type.charAt(0).toUpperCase() + entry.media_type.slice(1)}
+                          coverImage={entry.cover_image_url || "/placeholder.svg?height=200&width=150"}
+                          dateCompleted={formatDate(entry.date_completed)}
+                          rating={entry.rating}
+                          review={entry.notes || ""}
+                          status={entry.status}
+                        />
+                      ))
+                    )}
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="book" className="mt-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {getFilteredEntries("book").length === 0 ? (
+                      <div className="col-span-2 text-center py-12 text-amber-600">
+                        <p>No books yet. Add your first book!</p>
+                      </div>
+                    ) : (
+                      getFilteredEntries("book").map((entry) => (
+                        <MediaCard
+                          key={entry.id}
+                          id={entry.id || ''}
+                          title={entry.title}
+                          type="Book"
+                          coverImage={entry.cover_image_url || "/placeholder.svg?height=200&width=150"}
+                          dateCompleted={formatDate(entry.date_completed)}
+                          rating={entry.rating}
+                          review={entry.notes || ""}
+                        />
+                      ))
+                    )}
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="movie" className="mt-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {getFilteredEntries("movie").length === 0 ? (
+                      <div className="col-span-2 text-center py-12 text-amber-600">
+                        <p>No movies yet. Add your first movie!</p>
+                      </div>
+                    ) : (
+                      getFilteredEntries("movie").map((entry) => (
+                        <MediaCard
+                          key={entry.id}
+                          id={entry.id || ''}
+                          title={entry.title}
+                          type="Movie"
+                          coverImage={entry.cover_image_url || "/placeholder.svg?height=200&width=150"}
+                          dateCompleted={formatDate(entry.date_completed)}
+                          rating={entry.rating}
+                          review={entry.notes || ""}
+                        />
+                      ))
+                    )}
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="podcast" className="mt-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {getFilteredEntries("podcast").length === 0 ? (
+                      <div className="col-span-2 text-center py-12 text-amber-600">
+                        <p>No podcasts yet. Add your first podcast!</p>
+                      </div>
+                    ) : (
+                      getFilteredEntries("podcast").map((entry) => (
+                        <MediaCard
+                          key={entry.id}
+                          id={entry.id || ''}
+                          title={entry.title}
+                          type="Podcast"
+                          coverImage={entry.cover_image_url || "/placeholder.svg?height=200&width=150"}
+                          dateCompleted={formatDate(entry.date_completed)}
+                          rating={entry.rating}
+                          review={entry.notes || ""}
+                        />
+                      ))
+                    )}
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="article" className="mt-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {getFilteredEntries("article").length === 0 ? (
+                      <div className="col-span-2 text-center py-12 text-amber-600">
+                        <p>No articles yet. Add your first article!</p>
+                      </div>
+                    ) : (
+                      getFilteredEntries("article").map((entry) => (
+                        <MediaCard
+                          key={entry.id}
+                          id={entry.id || ''}
+                          title={entry.title}
+                          type="Article"
+                          coverImage={entry.cover_image_url || "/placeholder.svg?height=200&width=150"}
+                          dateCompleted={formatDate(entry.date_completed)}
+                          rating={entry.rating}
+                          review={entry.notes || ""}
+                        />
+                      ))
+                    )}
+                  </div>
+                </TabsContent>
+              </>
+            )}
+          </Tabs>
+        </div>
+
+        <div className="bg-amber-50 rounded-lg p-4">
+          <h2 className="text-xl font-semibold text-amber-800 mb-4">Friend Activity</h2>
+          <FriendFeed />
+        </div>
+      </div>
     </div>
-  );
+  )
 }
